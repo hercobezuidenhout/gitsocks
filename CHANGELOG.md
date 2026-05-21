@@ -13,3 +13,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for uncommitted changes detection
 - Theme-aware styling using CodeLens colors
 - VS Code Git extension API integrationOka
+- Something new here
