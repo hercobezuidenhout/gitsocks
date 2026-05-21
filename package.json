@@ -2,7 +2,7 @@
   "name": "gitsocks",
   "displayName": "Gitsocks",
   "description": "Inline git blame annotations showing author, date, and commit message for the current line",
-  "version": "0.1.0-beta.2",
+  "version": "0.1.0-beta.3",
   "publisher": "hercobezuidenhout",
   "type": "module",
   "engines": {
