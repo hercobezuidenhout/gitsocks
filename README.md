@@ -37,25 +37,51 @@ This extension does not contribute any settings. It works automatically when you
 
 None at this time. Please report issues on the [GitHub repository](https://github.com/hercobezuidenhout/gitsocks/issues).
 
-## Release Notes
-
-### 0.0.1
-
-Initial release of Gitsocks:
-- Inline git blame annotations
-- Real-time updates as cursor moves
-- Relative time formatting (e.g., "2 days ago")
-- Support for uncommitted changes
-- Theme-aware styling
-
-## Resources
-
-- [VS Code Extension API Documentation](https://code.visualstudio.com/api) - Learn more about building VS Code extensions
-
 ## License
 
 MIT
 
----
+## Contributing
 
-**Enjoy!**
+Contributions are welcome! Please follow these guidelines:
+
+### Commit Messages
+
+This project follows [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/). Use the following format:
+
+```
+<type>: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+**Common types:**
+- `feat:` - New feature
+- `fix:` - Bug fix
+- `docs:` - Documentation changes
+- `test:` - Test additions or changes
+- `refactor:` - Code refactoring
+- `chore:` - Maintenance tasks
+
+**Examples:**
+```
+feat: add configuration option for blame text color
+fix: handle files with no git history
+docs: update installation instructions
+```
+
+### Workflow
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feat/your-feature`)
+3. Make your changes with conventional commits
+4. Run tests: `npm test`
+5. Submit a pull request
+
+### Pull Request Guidelines
+
+- **Trunk-based development**: All PRs will be squashed into `main` when merged
+- **Issue tracking**: Link your PR to a GitHub issue (e.g., "Closes #123")
+- **CHANGELOG entries**: Each entry must reference a GitHub issue for tracking (e.g., "- Added feature X [#123](https://github.com/hercobezuidenhout/gitsocks/issues/123)")
