@@ -135,37 +135,17 @@ jobs:
           npx @vscode/vsce package --pre-release
 
       - name: Create GitHub Release
-        uses: actions/create-release@v1
-        id: create_release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v${{ steps.version.outputs.version }}
-          release_name: v${{ steps.version.outputs.version }}
-          body: |
-            Beta release v${{ steps.version.outputs.version }}
-
-            This is a pre-release version. Install from the VSIX file below or enable pre-release versions in VS Code.
-          draft: false
-          prerelease: true
-
-      - name: Upload VSIX to release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./gitsocks-${{ steps.version.outputs.version }}.vsix
-          asset_name: gitsocks-${{ steps.version.outputs.version }}.vsix
-          asset_content_type: application/octet-stream
+        run: |
+          gh release create "v${{ steps.version.outputs.version }}" \
+            ./gitsocks-${{ steps.version.outputs.version }}.vsix \
+            --title "v${{ steps.version.outputs.version }}" \
+            --notes "🚧 **Pre-release version** - Install from the VSIX file below or enable pre-release versions in VS Code." \
+            --prerelease \
+            --generate-notes
 
       - name: Publish to VS Code Marketplace
         if: ${{ env.HAVE_VSCE_PAT == 'true' }}
         run: |
           npx @vscode/vsce publish --pre-release --pat ${{ secrets.VSCE_PAT }}
-
-      - name: Skip marketplace publish
-        if: ${{ env.HAVE_VSCE_PAT != 'true' }}
-        run: |
-          echo "⚠️ VSCE_PAT secret not configured - skipping marketplace publish"
-          echo "Extension published to GitHub Releases only"
