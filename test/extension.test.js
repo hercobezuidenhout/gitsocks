@@ -3,11 +3,11 @@ import * as vscode from 'vscode';
 
 suite('Extension Integration Tests', () => {
 	test('Extension should be present', () => {
-		assert.ok(vscode.extensions.getExtension('hercobezuidenhout.simple-git'));
+		assert.ok(vscode.extensions.getExtension('hercobezuidenhout.gitsocks'));
 	});
 
 	test('Extension should activate', async () => {
-		const ext = vscode.extensions.getExtension('hercobezuidenhout.simple-git');
+		const ext = vscode.extensions.getExtension('hercobezuidenhout.gitsocks');
 		await ext.activate();
 		assert.strictEqual(ext.isActive, true);
 	});
