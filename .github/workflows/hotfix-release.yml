@@ -1,0 +1,140 @@
+name: Hotfix Release
+
+on:
+  push:
+    branches:
+      - 'hotfix/**'
+
+jobs:
+  release:
+    name: Create Hotfix Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Detect base version
+        id: base
+        run: |
+          # Find where this hotfix branch diverged from main
+          BRANCH_POINT=$(git merge-base HEAD origin/main)
+          echo "Branch point: $BRANCH_POINT"
+
+          # Find the nearest tag at or before that point
+          BASE_TAG=$(git describe --tags --abbrev=0 $BRANCH_POINT 2>/dev/null || echo "")
+
+          if [ -z "$BASE_TAG" ]; then
+            echo "Error: Cannot determine base version - no tags found"
+            exit 1
+          fi
+
+          # Remove 'v' prefix if present
+          BASE_VERSION=$(echo "$BASE_TAG" | sed 's/^v//')
+          echo "base=$BASE_VERSION" >> $GITHUB_OUTPUT
+          echo "Base version: $BASE_VERSION"
+
+      - name: Calculate hotfix version
+        id: version
+        run: |
+          BASE="${{ steps.base.outputs.base }}"
+
+          # Parse base version
+          if [[ $BASE =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+            MAJOR="${BASH_REMATCH[1]}"
+            MINOR="${BASH_REMATCH[2]}"
+            PATCH="${BASH_REMATCH[3]}"
+          else
+            echo "Invalid base version format: $BASE"
+            exit 1
+          fi
+
+          # Increment patch version
+          PATCH=$((PATCH + 1))
+          HOTFIX_VERSION="$MAJOR.$MINOR.$PATCH"
+
+          echo "version=$HOTFIX_VERSION" >> $GITHUB_OUTPUT
+          echo "Hotfix version: $HOTFIX_VERSION"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Update package.json version
+        run: |
+          HOTFIX_VERSION="${{ steps.version.outputs.version }}"
+          npm version $HOTFIX_VERSION --no-git-tag-version
+          echo "Updated package.json to $HOTFIX_VERSION"
+
+      - name: Update CHANGELOG.md
+        run: |
+          HOTFIX_VERSION="${{ steps.version.outputs.version }}"
+          DATE=$(date +%Y-%m-%d)
+
+          # Add new hotfix section after [Unreleased]
+          sed -i "/## \[Unreleased\]/a\\
+\\
+## [$HOTFIX_VERSION] - $DATE\\
+### Fixed\\
+- Hotfix for critical issue" CHANGELOG.md
+
+          echo "Updated CHANGELOG.md with hotfix version $HOTFIX_VERSION"
+
+      - name: Commit hotfix release
+        run: |
+          HOTFIX_VERSION="${{ steps.version.outputs.version }}"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add package.json CHANGELOG.md
+          git commit -m "hotfix: Release v$HOTFIX_VERSION"
+
+      - name: Create git tag
+        run: |
+          HOTFIX_VERSION="${{ steps.version.outputs.version }}"
+          git tag "v$HOTFIX_VERSION"
+          git push origin "v$HOTFIX_VERSION"
+
+      - name: Build extension
+        run: |
+          npx @vscode/vsce package
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        id: create_release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          release_name: v${{ steps.version.outputs.version }}
+          body: |
+            Hotfix release v${{ steps.version.outputs.version }}
+
+            This is a patch release for v${{ steps.base.outputs.base }}.
+
+            See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details.
+          draft: false
+          prerelease: false
+
+      - name: Upload VSIX to release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./gitsocks-${{ steps.version.outputs.version }}.vsix
+          asset_name: gitsocks-${{ steps.version.outputs.version }}.vsix
+          asset_content_type: application/octet-stream
+
+      - name: Publish to VS Code Marketplace
+        run: |
+          npx @vscode/vsce publish --pat ${{ secrets.VSCE_PAT }}
