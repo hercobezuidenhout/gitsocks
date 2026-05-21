@@ -33,14 +33,6 @@ Uncommitted changes
 
 This extension does not contribute any settings. It works automatically when you open files in a git repository.
 
-## Known Issues
-
-None at this time. Please report issues on the [GitHub repository](https://github.com/hercobezuidenhout/gitsocks/issues).
-
-## License
-
-MIT
-
 ## Contributing
 
 Contributions are welcome! Please follow these guidelines:
