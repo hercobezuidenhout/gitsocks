@@ -7,11 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.1.0] - 2026-05-21
-
 ### Added
 - Real-time inline git blame annotations showing author, relative time, commit message, and short hash
 - Debounced cursor tracking (300ms) for optimal performance
 - Support for uncommitted changes detection
 - Theme-aware styling using CodeLens colors
-- VS Code Git extension API integration
+- VS Code Git extension API integrationOka
