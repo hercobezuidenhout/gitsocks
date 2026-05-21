@@ -16,6 +16,8 @@ jobs:
       name: production
     permissions:
       contents: write
+    env:
+      HAVE_VSCE_PAT: ${{ secrets.VSCE_PAT != '' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -112,13 +114,12 @@ jobs:
           asset_content_type: application/octet-stream
 
       - name: Publish to VS Code Marketplace
-        continue-on-error: true
-        env:
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        if: ${{ env.HAVE_VSCE_PAT == 'true' }}
         run: |
-          if [ -z "$VSCE_PAT" ]; then
-            echo "⚠️ VSCE_PAT secret not configured - skipping marketplace publish"
-            echo "Extension published to GitHub Releases only"
-            exit 0
-          fi
-          npx @vscode/vsce publish --pat $VSCE_PAT
+          npx @vscode/vsce publish --pat ${{ secrets.VSCE_PAT }}
+
+      - name: Skip marketplace publish
+        if: ${{ env.HAVE_VSCE_PAT != 'true' }}
+        run: |
+          echo "⚠️ VSCE_PAT secret not configured - skipping marketplace publish"
+          echo "Extension published to GitHub Releases only"
