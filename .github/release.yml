@@ -9,25 +9,25 @@ changelog:
     authors:
       - dependabot
   categories:
-    - title: 💥 Breaking Changes
+    - title: Breaking Changes
       labels:
         - breaking-change
         - bump:major
-    - title: 🚀 Features
+    - title: Features
       labels:
         - enhancement
         - feature
-    - title: 🐛 Bug Fixes
+    - title: Bug Fixes
       labels:
         - bug
         - fix
-    - title: 📚 Documentation
+    - title: Documentation
       labels:
         - documentation
-    - title: 🔧 Maintenance
+    - title: Maintenance
       labels:
         - chore
         - dependencies
-    - title: 🎨 Other Changes
+    - title: Other Changes
       labels:
         - "*"

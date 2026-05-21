@@ -88,6 +88,23 @@ jobs:
         run: |
           npx @vscode/vsce package
 
+      - name: Extract CHANGELOG for release
+        id: changelog
+        run: |
+          VERSION="${{ steps.version.outputs.stable }}"
+          # Extract content between ## [VERSION] and the next ## heading
+          CHANGELOG_CONTENT=$(sed -n "/## \[$VERSION\]/,/^## \[/{ /^## \[$VERSION\]/d; /^## \[/d; p; }" CHANGELOG.md | sed '/^$/d')
+
+          # Create release notes with CHANGELOG content
+          cat > release_notes.md <<EOF
+          ## Changes in this release
+
+          $CHANGELOG_CONTENT
+
+          ---
+          See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for full history.
+          EOF
+
       - name: Create GitHub Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -95,7 +112,7 @@ jobs:
           gh release create "v${{ steps.version.outputs.stable }}" \
             ./gitsocks-${{ steps.version.outputs.stable }}.vsix \
             --title "v${{ steps.version.outputs.stable }}" \
-            --notes "See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for full details." \
+            --notes-file release_notes.md \
             --latest \
             --generate-notes
 

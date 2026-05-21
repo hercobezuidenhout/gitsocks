@@ -134,6 +134,21 @@ jobs:
         run: |
           npx @vscode/vsce package --pre-release
 
+      - name: Extract CHANGELOG for release
+        id: changelog
+        run: |
+          # Extract content between ## [Unreleased] and the next ## heading
+          CHANGELOG_CONTENT=$(sed -n '/## \[Unreleased\]/,/^## \[/{ /^## \[Unreleased\]/d; /^## \[/d; p; }' CHANGELOG.md | sed '/^$/d')
+
+          # Create release notes with CHANGELOG content
+          cat > release_notes.md <<EOF
+          **Pre-release version** - Install from the VSIX file below or enable pre-release versions in VS Code.
+
+          ## Changes in this release
+
+          $CHANGELOG_CONTENT
+          EOF
+
       - name: Create GitHub Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -141,7 +156,7 @@ jobs:
           gh release create "v${{ steps.version.outputs.version }}" \
             ./gitsocks-${{ steps.version.outputs.version }}.vsix \
             --title "v${{ steps.version.outputs.version }}" \
-            --notes "🚧 **Pre-release version** - Install from the VSIX file below or enable pre-release versions in VS Code." \
+            --notes-file release_notes.md \
             --prerelease \
             --generate-notes
 
