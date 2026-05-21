@@ -112,5 +112,12 @@ jobs:
           asset_content_type: application/octet-stream
 
       - name: Publish to VS Code Marketplace
+        if: ${{ secrets.VSCE_PAT != '' }}
         run: |
           npx @vscode/vsce publish --pat ${{ secrets.VSCE_PAT }}
+
+      - name: Skip marketplace publish
+        if: ${{ secrets.VSCE_PAT == '' }}
+        run: |
+          echo "⚠️ VSCE_PAT secret not configured - skipping marketplace publish"
+          echo "Extension published to GitHub Releases only"
